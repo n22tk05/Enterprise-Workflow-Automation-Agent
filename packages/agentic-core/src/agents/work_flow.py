@@ -1,17 +1,16 @@
 from langgraph.graph import StateGraph, END
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import SystemMessage
 
 from src.tools import TOOLS_LIST
 from src.state.graph_state import AgentState
 
-# 1. Khởi tạo LLM (Sử dụng OpenAI hoặc thay bằng mô hình khác)
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+# 1. Khởi tạo LLM (Sử dụng Google Gemini - Nhớ dùng model gemini-1.5-flash hoặc pro)
+llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
 
 # 2. "Trang bị" danh sách tools cho con AI
 llm_with_tools = llm.bind_tools(TOOLS_LIST)
-
 
 def agent_node(state: AgentState):
     """
@@ -38,7 +37,6 @@ def should_continue(state: AgentState) -> str:
     if hasattr(last_message, 'tool_calls') and last_message.tool_calls:
         return 'continue'
     return 'end'
-
 
 
 action_node = ToolNode(TOOLS_LIST)

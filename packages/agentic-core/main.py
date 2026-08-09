@@ -34,9 +34,9 @@ def run_chat():
 
 if __name__ == "__main__":
     # Kiểm tra xem bạn đã cấu hình API Key chưa trước khi cho phép chạy
-    if not os.environ.get("OPENAI_API_KEY"):
-        print("❌ LỖI: Chưa tìm thấy khóa OPENAI_API_KEY!")
+    if not (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")):
+        print("❌ LỖI: Chưa tìm thấy khóa GEMINI_API_KEY hoặc GOOGLE_API_KEY!")
         print("💡 Hướng dẫn sửa: Hãy tạo một file tên là '.env' nằm cùng thư mục với file main.py")
-        print("Sau đó dán dòng này vào: OPENAI_API_KEY=sk-xxxxxxx (Thay xxxxx bằng key của bạn)")
+        print("Sau đó dán dòng này vào: GEMINI_API_KEY=AIzaSy_xxxxx (Thay bằng key của bạn)")
     else:
         run_chat()
