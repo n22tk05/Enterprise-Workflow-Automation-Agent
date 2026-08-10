@@ -11,11 +11,12 @@ datasource db {
 
 // Bảng nhân viên
 model Employee {
-  id            String         @id @default(uuid())
-  employeeCode  String         @unique // Ví dụ: NV001
-  name          String
-  leaveBalance  Int            @default(12) // Mặc định có 12 ngày phép
-  requests      LeaveRequest[]
+  id           String         @id @default(uuid())
+  employeeCode String         @unique // Ví dụ: NV001
+  name         String
+  leaveBalance Int            @default(12) // Mặc định có 12 ngày phép
+  requests     LeaveRequest[]
+  Tikcer       Tikcer[]
 }
 
 // Bảng lịch sử xin nghỉ phép
@@ -28,4 +29,32 @@ model LeaveRequest {
   reason     String
   status     String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt  DateTime @default(now())
+}
+
+enum Priority {
+  HIHG
+  MEDIUM
+  LOW
+}
+
+enum Status {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+model Tikcer {
+  id         String   @id @default(uuid())
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  issue      String
+  priority   Priority @default(MEDIUM)
+  status     Status   @default(OPEN)
+  createdAt  DateTime @default(now())
+}
+
+model Policy {
+  id       String @id @default(uuid())
+  category String
+  rule     String
 }

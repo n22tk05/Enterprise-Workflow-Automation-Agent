@@ -85,3 +85,10 @@ async def submit_leave_request(employee_code: str, start_date: str, end_date: st
     await db.disconnect()
     return json.dumps({'message': f'Gửi đơn thành công. Đã trừ {total_days} ngày phép.'})
 
+@tool
+async def create_it_ticker(request: str): 
+    """
+    Receive a bug fix request, automatically assess its severity, and save it to the database.
+    Arg:
+        
+    """
