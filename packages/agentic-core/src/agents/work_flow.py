@@ -1,13 +1,14 @@
 from langgraph.graph import StateGraph, END
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import SystemMessage
+from langgraph.checkpoint.memory import MemorySaver
 
 from src.tools import TOOLS_LIST
 from src.state.graph_state import AgentState
 
-# 1. Khởi tạo LLM (Sử dụng Google Gemini - Nhớ dùng model gemini-1.5-flash hoặc pro)
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0)
+# 1. Khởi tạo LLM (Sử dụng Groq siêu tốc độ với Llama-3.1)
+llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
 
 # 2. "Trang bị" danh sách tools cho con AI
 llm_with_tools = llm.bind_tools(TOOLS_LIST)
@@ -38,6 +39,7 @@ def should_continue(state: AgentState) -> str:
         return 'continue'
     return 'end'
 
+checkpointer = MemorySaver()
 
 action_node = ToolNode(TOOLS_LIST)
 
@@ -59,4 +61,4 @@ workflow.add_conditional_edges(
 
 workflow.add_edge("action", "agent")
 
-app = workflow.compile()
+app = workflow.compile(checkpointer=checkpointer)

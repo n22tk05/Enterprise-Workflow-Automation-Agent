@@ -1,0 +1,31 @@
+generator client {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Bảng nhân viên
+model Employee {
+  id            String         @id @default(uuid())
+  employeeCode  String         @unique // Ví dụ: NV001
+  name          String
+  leaveBalance  Int            @default(12) // Mặc định có 12 ngày phép
+  requests      LeaveRequest[]
+}
+
+// Bảng lịch sử xin nghỉ phép
+model LeaveRequest {
+  id         String   @id @default(uuid())
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  startDate  DateTime
+  endDate    DateTime
+  reason     String
+  status     String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt  DateTime @default(now())
+}

@@ -1,12 +1,10 @@
-from .mock_tools import (
+from .db_tools import (
     get_employee_profile,
     check_leave_balance,
-    create_leave_request,
-    search_company_policy   
+    submit_leave_request,
 )
 TOOLS_LIST = [
     get_employee_profile, 
     check_leave_balance, 
-    create_leave_request, 
-    search_company_policy
+    submit_leave_request, 
 ]
