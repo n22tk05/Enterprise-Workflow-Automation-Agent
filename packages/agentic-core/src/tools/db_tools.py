@@ -44,7 +44,7 @@ async def check_leave_balance(employee_code: str) -> str:
     return json.dumps(result, default=str)
 
 @tool
-async def submit_leave_request(employee_code: str, start_date: str, end_date: str, reason: str) -> str:
+async def submit_leave_request(employee_code: str, start_date: str, end_date: str, reason: str) -> dict:
     """
     Create and submit a leave request for an employee.
     Args:
@@ -56,35 +56,36 @@ async def submit_leave_request(employee_code: str, start_date: str, end_date: st
     db = Prisma()
     await db.connect()
 
-    # Process and normalize dates
-    start_dt = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
-    end_dt = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
-    total_days = (end_dt - start_dt).days + 1
-    
-    employee = await db.employee.find_unique(where={'employeeCode': employee_code})
-    if not employee:
-        await db.disconnect()
-        return json.dumps({"error": "Employee not found"})
+    try:
+        # Process and normalize dates
+        start_dt = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+        end_dt = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+        total_days = (end_dt - start_dt).days + 1
+        
+        employee = await db.employee.find_unique(where={'employeeCode': employee_code})
+        if not employee:
+            return {"error": "Employee not found"}
 
-    if employee.leaveBalance < total_days:
-        await db.disconnect()
-        return json.dumps({"error": f"Insufficient leave balance. You only have {employee.leaveBalance} days remaining."})
+        if employee.leaveBalance < total_days:
+            return {"error": f"Insufficient leave balance. You only have {employee.leaveBalance} days remaining."}
 
-    await db.leaverequest.create(data={
-        'employeeId': employee.id,
-        'startDate': start_dt,
-        'endDate': end_dt,
-        'reason': reason
-    })
+        await db.leaverequest.create(data={
+            'employeeId': employee.id,
+            'startDate': start_dt,
+            'endDate': end_dt,
+            'reason': reason
+        })
+        
+        await db.employee.update(
+            where={'employeeCode': employee_code},
+            data={'leaveBalance': employee.leaveBalance - total_days}
+        )
+        
+        return {'message': f'Leave request submitted successfully. Deducted {total_days} leave days.'}
     
-    await db.employee.update(
-        where={'employeeCode': employee_code},
-        data={'leaveBalance': employee.leaveBalance - total_days}
-    )
-    
-    await db.disconnect()
-    return json.dumps({'message': f'Leave request submitted successfully. Deducted {total_days} leave days.'})
-
+    finally:
+        await db.disconnect() # Đảm bảo luôn ngắt kết nối database dù có lỗi xảy ra
+        
 @tool
 async def create_it_ticket(employee_code: str, issue: str, priority: str) -> str: 
     """

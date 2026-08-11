@@ -13,10 +13,15 @@ class Request(BaseModel):
 
 api_app = FastAPI()
 
+@api_app.get('/connect')
+async def a():
+    return {
+        'messager': 'python Hi'
+    }
+
 @api_app.post('/chat')
 async def chat_endpoint(req: Request):
     inputs = {'messages': [HumanMessage(content=req.message)]}
-
     config = {'configurable': {'thread_id': req.thread_id}}
     result = await app.ainvoke(inputs, config=config)
 
